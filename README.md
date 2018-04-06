@@ -63,7 +63,7 @@ SBT:
 
 ### 3.1 自定义RPC service (endpoint)
 
-一个 endpoint 即为一个 RPC 服务，可定义处理任意自定义类型的消息对象。不像 thrift，消息对象不需单独编译。
+一个 endpoint 即为一个 RPC 服务，可定义任意类型的消息对象。不像 thrift，消息对象不需单独编译。
 
 ```
 class HelloEndpoint(override val rpcEnv: RpcEnv) extends RpcEndpoint {
