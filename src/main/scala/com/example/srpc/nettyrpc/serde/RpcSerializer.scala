@@ -1,4 +1,4 @@
-package com.example.srpc.snettyrpc.serde
+package com.example.srpc.nettyrpc.serde
 
 import java.io._
 import java.nio.ByteBuffer
