@@ -1,7 +1,9 @@
 ## netty eventloop
+- [1. epoll](#1-epoll)
+- [2. Selector](#2-Selector)
+- [3. ServerBootStrap](#3-BootStrap)
 
-# epoll 
-## 原理
+## epoll
 (1) epoll_create 会触发内核创建一个 eventpoll 结构体(可以理解为一个文件系统)
 ```
 struct eventpoll{
@@ -36,14 +38,14 @@ struct epitem{
 
 (7) 也即，相应事件发生时会调用这个回调。这个回调在内核中叫ep_poll_callback,它会将发生的事件添加到 rdlist 双向链表中
 
-## 主要接口
+### 主要接口
 (1) epoll_create(): 此调用返回一个句柄，之后所有的使用都依靠这个句柄来标识
 
 (2) epoll_ctl() : 此调用向 eventpoll 添加、删除、修改感兴趣的事件，0标识成功，-1表示失败
 
 (3) epoll_wait() : 此调用收集在 epoll 中已经发生的事件，检查 eventpoll 中 rdlist 双链表中是否有 epitem 元素即可
 
-## java nio epoll 100% CPU bug
+### java nio epoll 100% CPU bug
 ```
 bug发生时：不管有没有已选择的SelectionKey，Selector.select()方法总是不会阻塞并且会立刻返回。
 这违反了 Javadoc 对 Selector.select() 方法的描述。
@@ -69,7 +71,7 @@ while (iterator.hasNext()) {
 
 (4) 一个Channel可以注册到多个不同的Selector
 
-## SelectionKey
+### SelectionKey
 (1) Channel注册到Selector后会返回一个SelectionKey对象
 
 (2) SelectionKey 代表 Channel 和它注册的 Selector 间的关系
@@ -80,23 +82,22 @@ while (iterator.hasNext()) {
 
 (5) readyOps : 当Channel有感兴趣的事件发生，就会将感兴趣的事件设置到 readyOps 中
 
-## keys : SelectionKey
+### keys : SelectionKey
 所有注册到Selector的Channel所表示的SelectionKey都会存在于该集合中。keys元素的添加会在Channel注册到Selector时发生
 
-## selectedKeys : SelectionKey
+### selectedKeys : SelectionKey
 对应的Channel在上一次操作 selection 期间被检测到至少有一种 SelectionKey 感兴趣的操作已经就绪
 
-## cancelledKeys : SelectionKey
+### cancelledKeys : SelectionKey
 执行了取消操作的SelectionKey会被放入到该集合中。该集合是keys的一个子集
 
-# server
-
-## BossGroup
+## server
+### BossGroup
 * 通常是一个 EventExecutor 执行线程
 * 在 server 端，用于管理 bind socket address 的 channel(相当于管理 bind 类型的文件)
 * 在 client 端，用于管理 connect remote peer 的 channel(相当于管理 connect 类型的文件)
 
-## WorkerGroup
+### WorkerGroup
 * 多个 EventExecutor 执行线程
 * 在 server 端，管理所有从 client 端来的 channel
 ```
@@ -127,12 +128,12 @@ while (iterator.hasNext()) {
 ```
 
 
-## NioEventLoopGroup 
+### NioEventLoopGroup 
 * EventExecutor[]：一组 NioEventLoop 组成的 EventLoop 池(即线程池), 每个 EventExecutor 管理一个 Selector(即管理多个 Socket 连接: SelectionKey )
 * EventExecutorChooser : 选择 next 的策略对象
 
-## NioEventLoop
-### run (读 Selector / 处理 Task)
+### NioEventLoop
+#### run (读 Selector / 处理 Task)
 (1) Calculate SelectStrategy : Continue/Select/Other
 
 (2) Process SelectedKeys
