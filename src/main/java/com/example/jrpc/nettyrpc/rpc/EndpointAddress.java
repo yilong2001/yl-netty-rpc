@@ -32,7 +32,7 @@ public class EndpointAddress {
         this.name = name;
     }
 
-    public String toString() { return "LSM://"+name+"@"+hostPort.getHost()+":"+hostPort.getPort(); }
+    public String toString() { return "RPC://"+name+"@"+hostPort.getHost()+":"+hostPort.getPort(); }
 
     public static  EndpointAddress parse(String url) throws RpcException {
         try {
