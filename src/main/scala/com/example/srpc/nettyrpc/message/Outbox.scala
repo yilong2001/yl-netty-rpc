@@ -8,7 +8,7 @@ import com.example.jrpc.nettyrpc.exception.RpcException
 import com.example.jrpc.nettyrpc.netty.handler.client.ConcurrentNettyChannelClient
 import com.example.jrpc.nettyrpc.rpc.HostPort
 import com.example.srpc.nettyrpc.netty.NettyRpcEnv
-import org.slf4j.{Logger, LoggerFactory}
+import org.apache.commons.logging.LogFactory
 
 import scala.util.control.NonFatal
 
@@ -16,7 +16,7 @@ import scala.util.control.NonFatal
   * Created by yilong on 2018/3/28.
   */
 class Outbox(val nettyRpcEnv: NettyRpcEnv, val receiver: HostPort) {
-  private val logger = LoggerFactory.getLogger(classOf[Outbox])
+  private val logger = LogFactory.getLog(classOf[Outbox])
 
   val outbox = this
 

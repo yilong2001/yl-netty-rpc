@@ -13,8 +13,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.Closeable;
 import java.net.InetSocketAddress;
@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  * Created by yilong on 2018/3/14.
  */
 public class NettyServer implements Closeable {
-    private static final Logger logger = LoggerFactory.getLogger(NettyServer.class);
+    private static final Log logger = LogFactory.getLog(NettyServer.class);
 
     private final NettyContext nettyContext;
     private final String host;
@@ -108,7 +108,7 @@ public class NettyServer implements Closeable {
         channelFuture = bootstrap.bind(address);
         channelFuture.syncUninterruptibly();
 
-        logger.debug("Shuffle server started on port: {}", port);
+        logger.debug(String.format("Shuffle server started on port: {%d}", port));
     }
 
     @Override

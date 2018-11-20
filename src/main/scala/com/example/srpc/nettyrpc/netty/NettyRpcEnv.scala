@@ -3,7 +3,7 @@ package com.example.srpc.nettyrpc.netty
 import java.io.{IOException, ObjectOutputStream}
 import java.nio.ByteBuffer
 import java.util.Collections
-import java.util.concurrent.{ConcurrentHashMap, TimeoutException}
+import java.util.concurrent.{ConcurrentHashMap, Executors, TimeoutException}
 import java.util.concurrent.atomic.AtomicBoolean
 
 import com.example.jrpc.nettyrpc.exception.{RpcEndpointNotFoundException, RpcException, RpcTimeoutException}
@@ -17,7 +17,7 @@ import com.example.srpc.nettyrpc.message._
 import com.example.srpc.nettyrpc.serde.ByteBufferOutputStream
 import com.example.srpc.nettyrpc.util.ThreadUtils
 import com.google.common.util.concurrent.MoreExecutors
-import org.slf4j.{Logger, LoggerFactory}
+import org.apache.commons.logging.LogFactory
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.reflect.ClassTag
@@ -31,7 +31,7 @@ import scala.reflect.ClassTag
   *    EndpointRef 可以在 Client 用于多线程场景
   */
 class NettyRpcEnv(val config: RpcEnvConfig) extends RpcEnv(config) {
-  private val logger = LoggerFactory.getLogger(classOf[NettyRpcEnv])
+  private val logger = LogFactory.getLog(classOf[NettyRpcEnv])
 
   val rpcSerializer = new RpcSerializer
 
@@ -39,7 +39,7 @@ class NettyRpcEnv(val config: RpcEnvConfig) extends RpcEnv(config) {
   private val stopped = new AtomicBoolean(false)
 
   private val sameThreadExecutionContext =
-    ExecutionContext.fromExecutorService(MoreExecutors.newDirectExecutorService())
+    ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(config.getRpcConfig.getServerThreads * 3)/*(MoreExecutors.newDirectExecutorService()*/)
 
   val timeoutScheduler = ThreadUtils.newDaemonSingleThreadScheduledExecutor("NettyRpcEnvTimeout")
 

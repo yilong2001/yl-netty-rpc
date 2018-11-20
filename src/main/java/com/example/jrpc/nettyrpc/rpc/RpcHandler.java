@@ -1,7 +1,7 @@
 package com.example.jrpc.nettyrpc.rpc;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.nio.ByteBuffer;
 
@@ -56,8 +56,7 @@ public abstract class RpcHandler {
     public void exceptionCaught(Throwable cause, HostPort client) { }
 
     private static class OneWayRpcCallback implements RpcResponseCallback {
-
-        private static final Logger logger = LoggerFactory.getLogger(OneWayRpcCallback.class);
+        private static final Log logger = LogFactory.getLog(OneWayRpcCallback.class);
 
         @Override
         public void onSuccess(ByteBuffer response) {

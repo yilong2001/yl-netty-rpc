@@ -27,8 +27,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -55,7 +55,7 @@ import static com.example.jrpc.nettyrpc.netty.handler.NettyChannelCommonHandler.
  * [Request Id], [Content]
  */
 public class ConcurrentNettyChannelClient implements Closeable {
-    private static final Logger logger = LoggerFactory.getLogger(ConcurrentNettyChannelClient.class);
+    private static final Log logger = LogFactory.getLog(ConcurrentNettyChannelClient.class);
 
     private final Channel channel;
     private final NettyChannelResponseHandler handler;
@@ -110,7 +110,7 @@ public class ConcurrentNettyChannelClient implements Closeable {
     public long sendRpc(ByteBuffer message, RpcResponseCallback callback) {
         long startTime = System.currentTimeMillis();
         if (logger.isTraceEnabled()) {
-            logger.trace("Sending RPC to {}", getRemoteAddress(channel));
+            logger.trace("Sending RPC to " + getRemoteAddress(channel));
         }
 
         long requestId = Math.abs(UUID.randomUUID().getLeastSignificantBits());
@@ -122,8 +122,7 @@ public class ConcurrentNettyChannelClient implements Closeable {
                     if (future.isSuccess()) {
                         long timeTaken = System.currentTimeMillis() - startTime;
                         if (logger.isTraceEnabled()) {
-                            logger.trace("Sending request {} to {} took {} ms", requestId,
-                                    getRemoteAddress(channel), timeTaken);
+                            logger.trace("Sending request "+requestId+" to "+getRemoteAddress(channel)+" took "+timeTaken+" ms");
                         }
                     } else {
                         String errorMsg = String.format("Failed to send RPC %s to %s: %s", requestId,

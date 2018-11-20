@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 
 import com.example.jrpc.nettyrpc.netty.handler.client.ConcurrentNettyChannelClient
 import com.example.jrpc.nettyrpc.rpc.RpcResponseCallback
-import org.slf4j.LoggerFactory
+import org.apache.commons.logging.LogFactory
 
 /**
   * Created by yilong on 2018/3/28.
@@ -19,7 +19,7 @@ class RpcOutboxMessage(val content : ByteBuffer,
                        val onFailureCallback: (Throwable) => Unit,
                        val onSuccessCallback: (ConcurrentNettyChannelClient, ByteBuffer) => Unit)
   extends OutboxMessage with RpcResponseCallback {
-  private val logger = LoggerFactory.getLogger(classOf[RpcOutboxMessage])
+  private val logger = LogFactory.getLog(classOf[RpcOutboxMessage])
 
   private var client: ConcurrentNettyChannelClient = _
   private var requestId: Long = _

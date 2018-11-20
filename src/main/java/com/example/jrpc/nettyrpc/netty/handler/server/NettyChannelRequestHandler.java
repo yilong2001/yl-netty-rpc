@@ -13,8 +13,8 @@ import com.example.jrpc.nettyrpc.rpc.RpcHandler;
 import com.example.jrpc.nettyrpc.rpc.RpcResponseCallback;
 import com.google.common.base.Throwables;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -31,7 +31,7 @@ import java.nio.ByteBuffer;
  *  RpcHandler 即为统一 Dispather ，实现消息分发逻辑
  */
 public class NettyChannelRequestHandler extends INettyChannelHandler<RequestMessage> {
-    private static final Logger logger = LoggerFactory.getLogger(NettyChannelRequestHandler.class);
+    private static final Log logger = LogFactory.getLog(NettyChannelRequestHandler.class);
 
     private final Channel channel;
     private final HostPort defaultClient;
@@ -110,7 +110,7 @@ public class NettyChannelRequestHandler extends INettyChannelHandler<RequestMess
         SocketAddress remoteAddress = channel.remoteAddress();
         channel.writeAndFlush(result).addListener(future -> {
             if (future.isSuccess()) {
-                logger.trace("Sent result {} to client {}", result, remoteAddress);
+                logger.trace(String.format("Sent result %s to client %s", result, remoteAddress));
             } else {
                 logger.error(String.format("Error sending result %s to %s; closing connection",
                         result, remoteAddress), future.cause());

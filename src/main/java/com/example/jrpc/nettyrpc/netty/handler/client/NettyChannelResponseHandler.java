@@ -24,8 +24,10 @@ import com.example.jrpc.nettyrpc.netty.message.rsp.RpcFailure;
 import com.example.jrpc.nettyrpc.netty.message.rsp.RpcResponse;
 import com.example.jrpc.nettyrpc.rpc.RpcResponseCallback;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import scala.Predef;
+
 
 import java.io.IOException;
 import java.util.Map;
@@ -40,7 +42,7 @@ import static com.example.jrpc.nettyrpc.netty.handler.NettyChannelCommonHandler.
  * ，简化了对 Block 和 Stream 的支持，仅仅保留对 RpcMessage 的处理
  */
 public class NettyChannelResponseHandler extends INettyChannelHandler<ResponseMessage> {
-    private static final Logger logger = LoggerFactory.getLogger(NettyChannelCommonHandler.class);
+    private static final Log logger = LogFactory.getLog(NettyChannelResponseHandler.class);
 
     private final Channel channel;
 
@@ -62,8 +64,8 @@ public class NettyChannelResponseHandler extends INettyChannelHandler<ResponseMe
             RpcResponse resp = (RpcResponse) message;
             RpcResponseCallback listener = outstandingRpcs.get(resp.requestId);
             if (listener == null) {
-                logger.warn("Ignoring response for RPC {} from {} ({} bytes) since it is not outstanding",
-                        resp.requestId, getRemoteAddress(channel), resp.body().size());
+                logger.warn(String.format("Ignoring response for RPC %d from %s (%d bytes) since it is not outstanding",
+                        resp.requestId, getRemoteAddress(channel), resp.body().size()));
             } else {
                 outstandingRpcs.remove(resp.requestId);
                 try {
@@ -76,8 +78,8 @@ public class NettyChannelResponseHandler extends INettyChannelHandler<ResponseMe
             RpcFailure resp = (RpcFailure) message;
             RpcResponseCallback listener = outstandingRpcs.get(resp.requestId);
             if (listener == null) {
-                logger.warn("Ignoring response for RPC {} from {} ({}) since it is not outstanding",
-                        resp.requestId, getRemoteAddress(channel), resp.errorString);
+                logger.warn(String.format("Ignoring response for RPC {%d} from {%s} ({%s}) since it is not outstanding",
+                        resp.requestId, getRemoteAddress(channel), resp.errorString));
             } else {
                 outstandingRpcs.remove(resp.requestId);
                 listener.onFailure(new RuntimeException(resp.errorString));
@@ -95,8 +97,8 @@ public class NettyChannelResponseHandler extends INettyChannelHandler<ResponseMe
     public void channelInactive() {
         if (numOutstandingRequests() > 0) {
             String remoteAddress = getRemoteAddress(channel);
-            logger.error("Still have {} requests outstanding when connection from {} is closed",
-                    numOutstandingRequests(), remoteAddress);
+            logger.error(String.format("Still have {%d} requests outstanding when connection from {%s} is closed",
+                    numOutstandingRequests(), remoteAddress));
             failOutstandingRequests(new IOException("Connection from " + remoteAddress + " closed"));
         }
     }
@@ -105,8 +107,8 @@ public class NettyChannelResponseHandler extends INettyChannelHandler<ResponseMe
     public void exceptionCaught(Throwable cause) {
         if (numOutstandingRequests() > 0) {
             String remoteAddress = getRemoteAddress(channel);
-            logger.error("Still have {} requests outstanding when connection from {} is closed",
-                    numOutstandingRequests(), remoteAddress);
+            logger.error(String.format("Still have {%d} requests outstanding when connection from {%s} is closed",
+                    numOutstandingRequests(), remoteAddress));
             failOutstandingRequests(cause);
         }
     }

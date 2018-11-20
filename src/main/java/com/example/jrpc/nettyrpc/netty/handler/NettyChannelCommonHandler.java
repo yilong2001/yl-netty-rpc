@@ -13,8 +13,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.net.InetSocketAddress;
 
@@ -23,7 +23,7 @@ import java.net.InetSocketAddress;
  * common handler for server and client at same time
  */
 public class NettyChannelCommonHandler extends ChannelInboundHandlerAdapter {
-    private static final Logger logger = LoggerFactory.getLogger(NettyChannelCommonHandler.class);
+    private static final Log logger = LogFactory.getLog(NettyChannelCommonHandler.class);
 
     private final NettyChannelRequestHandler requestHandler;
     private final NettyChannelResponseHandler responseHandler;
@@ -85,7 +85,7 @@ public class NettyChannelCommonHandler extends ChannelInboundHandlerAdapter {
         try {
             requestHandler.channelInactive();
         } catch (RuntimeException e) {
-            logger.error("Exception from request handler while channel is inactive", e);
+            logger.error("Exception from request handler while channel is inactive ", e);
         }
         try {
             responseHandler.channelInactive();
@@ -124,9 +124,9 @@ public class NettyChannelCommonHandler extends ChannelInboundHandlerAdapter {
                 if (e.state() == IdleState.ALL_IDLE && isActuallyOverdue) {
                     if (responseHandler.numOutstandingRequests() > 0) {
                         String address = getRemoteAddress(ctx.channel());
-                        logger.error("Connection to {} has been quiet for {} ms while there are outstanding " +
+                        logger.error("Connection to "+address+" has been quiet for "+requestTimeoutNs / 1000 / 1000+" ms while there are outstanding " +
                                 "requests. Assuming connection is dead; please adjust spark.network.timeout if " +
-                                "this is wrong.", address, requestTimeoutNs / 1000 / 1000);
+                                "this is wrong.");
                         client.timeOut();
                         ctx.close();
                     } else if (closeIdleConnections) {

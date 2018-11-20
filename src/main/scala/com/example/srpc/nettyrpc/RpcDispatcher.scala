@@ -8,7 +8,7 @@ import com.example.jrpc.nettyrpc.rpc.{EndpointAddress, RpcResponseCallback}
 import com.example.srpc.nettyrpc.message._
 import com.example.srpc.nettyrpc.netty.{NettyRpcEnv, NettyRpcRemoteCallContext}
 import com.example.srpc.nettyrpc.util.ThreadUtils
-import org.slf4j.LoggerFactory
+import org.apache.commons.logging.LogFactory
 
 import scala.collection.JavaConverters._
 
@@ -17,7 +17,7 @@ import scala.collection.JavaConverters._
   * Created by yilong on 2018/3/19.
   */
 class RpcDispatcher(nettyEnv: NettyRpcEnv) {
-  private val logger = LoggerFactory.getLogger(classOf[RpcDispatcher])
+  private val logger = LogFactory.getLog(classOf[RpcDispatcher])
 
   private class EndpointData(val name: String,val endpoint: RpcEndpoint) {
     val addr = new EndpointAddress(nettyEnv.address, name)
@@ -46,17 +46,35 @@ class RpcDispatcher(nettyEnv: NettyRpcEnv) {
       try {
         while (true) {
           val data = endpointReceivers.poll()
-          try {
-            // 停止 inbox 的消息循环，通过 PoisonPill (一个特殊的 EndpointData)
-            // 发送给所有消息分发线程
-            if (data == PoisonPill) {
-              endpointReceivers.offer(PoisonPill)
-              return
-            }
+          if (data == null) {
+            Thread.`yield`()
+          } else {
+            try {
+              // 停止 inbox 的消息循环，通过 PoisonPill (一个特殊的 EndpointData)
+              // 发送给所有消息分发线程
+              if (data == PoisonPill) {
+                endpointReceivers.offer(PoisonPill)
+                return
+              }
 
-            data.inbox.process(RpcDispatcher.this)
-          } catch {
-            case e : Exception => logger.error(e.getMessage, e)
+              if (data == null) {
+                logger.error("data is null ... ")
+                throw new RuntimeException("data is null ... ")
+              }
+
+              if (data.inbox == null) {
+                logger.error("data.inbox is null ... ")
+                throw new RuntimeException("data.inbox is null ... ")
+              }
+
+              if (RpcDispatcher.this == null) {
+                logger.error("RpcDispatcher.this is null ... ")
+                throw new RuntimeException("RpcDispatcher.this is null ... ")
+              }
+              data.inbox.process(RpcDispatcher.this)
+            } catch {
+              case e: Exception => logger.error(e.getMessage, e)
+            }
           }
         }
       } catch {
@@ -73,6 +91,7 @@ class RpcDispatcher(nettyEnv: NettyRpcEnv) {
   def registerRpcEndpoint(name: String, endpoint: RpcEndpoint): EndpointAddress = {
     val addr = new EndpointAddress(nettyEnv.address, name)
     synchronized {
+      logger.info("registerRpcEndpoint start : "+name+"; "+endpoint.epName)
       if (stopped) {
         throw new IllegalStateException("RpcEnv has been stopped")
       }
@@ -81,6 +100,10 @@ class RpcDispatcher(nettyEnv: NettyRpcEnv) {
         throw new IllegalArgumentException(s"There is already an RpcEndpoint called $name")
       }
       val data = endpointDataMaps.get(name)
+      if (data == null) {
+        logger.error("register prc endpoint, but EndpointData is null ... ")
+        throw new RuntimeException("register prc endpoint, but EndpointData is null ... ")
+      }
       endpointReceivers.offer(data)  // for the OnStart message
     }
     addr
@@ -88,6 +111,7 @@ class RpcDispatcher(nettyEnv: NettyRpcEnv) {
 
   // Should be idempotent
   private def unregisterRpcEndpoint(name: String): Unit = {
+    logger.info("unregisterRpcEndpoint start : "+name+"; ")
     val data = endpointDataMaps.remove(name)
     if (data != null) {
       //OnStop message is added when inbox.stop called
@@ -101,6 +125,7 @@ class RpcDispatcher(nettyEnv: NettyRpcEnv) {
   }
 
   def stop(rpcEndpointRefName: String): Unit = {
+    logger.info("stop : "+rpcEndpointRefName+"; ")
     synchronized {
       if (stopped) {
         // This endpoint will be stopped by Dispatcher.stop() method.
@@ -171,6 +196,8 @@ class RpcDispatcher(nettyEnv: NettyRpcEnv) {
   private def postMessage(endpointName: String,
                            message: InboxMessage,
                            callbackIfStopped: (Exception) => Unit): Unit = {
+    logger.info("postMessage : "+endpointName+"; ")
+
     val error = synchronized {
       val data = endpointDataMaps.get(endpointName)
       if (stopped) {

@@ -2,7 +2,12 @@ package com.example.srpc.nettyrpc.util
 
 import java.util.concurrent._
 
+import com.example.jrpc.nettyrpc.exception.RpcException
 import com.google.common.util.concurrent.ThreadFactoryBuilder
+
+import scala.concurrent.Awaitable
+import scala.concurrent.duration.Duration
+import scala.util.control.NonFatal
 
 /**
   * Created by yilong on 2018/3/29.
@@ -41,5 +46,36 @@ object ThreadUtils {
   def newDaemonFixedThreadPool(nThreads: Int, prefix: String): ThreadPoolExecutor = {
     val threadFactory = namedThreadFactory(prefix)
     Executors.newFixedThreadPool(nThreads, threadFactory).asInstanceOf[ThreadPoolExecutor]
+  }
+
+  @throws(classOf[RpcException])
+  def awaitResult[T](awaitable: Awaitable[T], atMost: Duration): T = {
+    try {
+      val awaitPermission = null.asInstanceOf[scala.concurrent.CanAwait]
+      awaitable.result(atMost)(awaitPermission)
+    } catch {
+      // TimeoutException is thrown in the current thread, so not need to warp the exception.
+      case NonFatal(t) if !t.isInstanceOf[TimeoutException] =>
+        throw new RpcException("Exception thrown in awaitResult: ", t)
+    }
+  }
+
+
+  // scalastyle:off awaitready
+  /**
+    * Preferred alternative to `Await.ready()`.
+    *
+    * @see [[awaitResult]]
+    */
+  @throws(classOf[RpcException])
+  def awaitReady[T](awaitable: Awaitable[T], atMost: Duration): awaitable.type = {
+    try {
+      val awaitPermission = null.asInstanceOf[scala.concurrent.CanAwait]
+      awaitable.ready(atMost)(awaitPermission)
+    } catch {
+      // TimeoutException is thrown in the current thread, so not need to warp the exception.
+      case NonFatal(t) if !t.isInstanceOf[TimeoutException] =>
+        throw new RpcException("Exception thrown in awaitResult: ", t)
+    }
   }
 }

@@ -23,8 +23,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.List;
 
@@ -34,8 +34,7 @@ import java.util.List;
  */
 @ChannelHandler.Sharable
 public final class MessageEncoder extends MessageToMessageEncoder<IMessage> {
-
-  private static final Logger logger = LoggerFactory.getLogger(MessageEncoder.class);
+  private static final Log logger = LogFactory.getLog(MessageEncoder.class);
 
   public static final MessageEncoder INSTANCE = new MessageEncoder();
 

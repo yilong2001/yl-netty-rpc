@@ -7,8 +7,8 @@ import com.example.jrpc.nettyrpc.netty.message.rsp.RpcFailure;
 import com.example.jrpc.nettyrpc.netty.message.rsp.RpcResponse;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import java.util.List;
  * Created by yilong on 2018/3/7.
  */
 public abstract class IMessage {
-    private static final Logger logger = LoggerFactory.getLogger(MessageDecoder.class);
+    private static final Log logger = LogFactory.getLog(IMessage.class);
 
     abstract public IMessage.MessageType type();
 

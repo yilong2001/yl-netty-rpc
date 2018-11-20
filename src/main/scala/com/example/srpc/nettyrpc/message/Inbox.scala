@@ -5,7 +5,7 @@ import javax.annotation.concurrent.GuardedBy
 import com.example.jrpc.nettyrpc.exception.RpcException
 import com.example.jrpc.nettyrpc.rpc.{EndpointAddress, HostPort}
 import com.example.srpc.nettyrpc._
-import org.slf4j.LoggerFactory
+import org.apache.commons.logging.LogFactory
 
 import scala.util.control.NonFatal
 
@@ -41,7 +41,7 @@ case class RemoteProcessConnectionError(cause: Throwable, remoteAddress: HostPor
 class Inbox(val endpointAddr: EndpointAddress, val endpoint: RpcEndpoint) {
   inbox =>  // Give this an alias so we can use it more clearly in closures.
 
-  private val logger = LoggerFactory.getLogger(classOf[Inbox])
+  private val logger = LogFactory.getLog(classOf[Inbox])
 
   @GuardedBy("this")
   protected val messages = new java.util.LinkedList[InboxMessage]()

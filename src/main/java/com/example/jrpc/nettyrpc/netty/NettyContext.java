@@ -9,8 +9,8 @@ import com.example.jrpc.nettyrpc.netty.handler.NettyChannelCommonHandler;
 import com.example.jrpc.nettyrpc.rpc.RpcHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.List;
  * Created by yilong on 2018/3/13.
  */
 public class NettyContext {
-    private static final Logger logger = LoggerFactory.getLogger(NettyContext.class);
+    private static final Log logger = LogFactory.getLog(NettyContext.class);
 
     private final RpcConfig config;
     private final RpcHandler rpcHandler;

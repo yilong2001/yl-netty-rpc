@@ -13,8 +13,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -43,7 +43,7 @@ public class NettyClientFactory implements Closeable {
         }
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(NettyClientFactory.class);
+    private static final Log logger = LogFactory.getLog(NettyClientFactory.class);
 
     private final NettyContext context;
     private final RpcConfig conf;
@@ -98,8 +98,8 @@ public class NettyClientFactory implements Closeable {
             }
 
             if (cachedClient.isActive()) {
-                logger.trace("Returning cached connection to {}: {}",
-                        cachedClient.getSocketAddress(), cachedClient);
+                logger.trace(String.format("Returning cached connection to {%s}: {%s}",
+                        cachedClient.getSocketAddress(), cachedClient));
                 return cachedClient;
             }
         }
@@ -110,9 +110,9 @@ public class NettyClientFactory implements Closeable {
         final InetSocketAddress resolvedAddress = new InetSocketAddress(remoteHost, remotePort);
         final long hostResolveTimeMs = (System.nanoTime() - preResolveHost) / 1000000;
         if (hostResolveTimeMs > 2000) {
-            logger.warn("DNS resolution for {} took {} ms", resolvedAddress, hostResolveTimeMs);
+            logger.warn(String.format("DNS resolution for {%s} took {%d} ms", resolvedAddress, hostResolveTimeMs));
         } else {
-            logger.trace("DNS resolution for {} took {} ms", resolvedAddress, hostResolveTimeMs);
+            logger.trace(String.format("DNS resolution for {%s} took {%d} ms", resolvedAddress, hostResolveTimeMs));
         }
 
         synchronized (clientPool.locks[clientIndex]) {
@@ -120,10 +120,10 @@ public class NettyClientFactory implements Closeable {
 
             if (cachedClient != null) {
                 if (cachedClient.isActive()) {
-                    logger.trace("Returning cached connection to {}: {}", resolvedAddress, cachedClient);
+                    logger.trace(String.format("Returning cached connection to {%s}: {%s}", resolvedAddress, cachedClient));
                     return cachedClient;
                 } else {
-                    logger.info("Found inactive connection to {}, creating a new one.", resolvedAddress);
+                    logger.info(String.format("Found inactive connection to {%s}, creating a new one.", resolvedAddress));
                 }
             }
             clientPool.clients[clientIndex] = createClient(remoteHostPort);
@@ -133,7 +133,7 @@ public class NettyClientFactory implements Closeable {
 
     private ConcurrentNettyChannelClient createClient(HostPort hostPort)
             throws IOException, InterruptedException {
-        logger.debug("Creating new connection to {}", hostPort);
+        logger.debug(String.format("Creating new connection to {%s}", hostPort));
 
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(workerGroup)
@@ -174,7 +174,7 @@ public class NettyClientFactory implements Closeable {
 
         // Execute any client bootstraps synchronously before marking the Client as successful.
         long preBootstrap = System.nanoTime();
-        logger.debug("Connection to {} successful, running bootstraps...", hostPort);
+        logger.debug(String.format("Connection to {%s} successful, running bootstraps...", hostPort));
         try {
             for (INettyClientBootstrapWrapper clientBootstrap : clientBootstraps) {
                 clientBootstrap.doBootstrap(client, channel);
@@ -187,10 +187,10 @@ public class NettyClientFactory implements Closeable {
         }
         long postBootstrap = System.nanoTime();
 
-        logger.info("Successfully created connection to {} after {} ms ({} ms spent in bootstraps)",
+        logger.info(String.format("Successfully created connection to {%s} after {%d} ms ({%d} ms spent in bootstraps)",
                 hostPort,
                 (postBootstrap - preConnect) / 1000000,
-                (postBootstrap - preBootstrap) / 1000000);
+                (postBootstrap - preBootstrap) / 1000000));
 
         return client;
     }
