@@ -119,7 +119,7 @@ class NettyRpcEnv(val config: RpcEnvConfig) extends RpcEnv(config) {
     }
 
     if (dispatcher != null) {
-      dispatcher.stop()
+      dispatcher.shutdownNow()
     }
 
     if (server != null) {
@@ -133,6 +133,14 @@ class NettyRpcEnv(val config: RpcEnvConfig) extends RpcEnv(config) {
     if (clientConnectionExecutor != null) {
       clientConnectionExecutor.shutdownNow()
     }
+
+    if (sameThreadExecutionContext != null) {
+      sameThreadExecutionContext.shutdownNow()
+    }
+  }
+
+  override def shutdownNow(): Unit = {
+    shutdown()
   }
 
   /**

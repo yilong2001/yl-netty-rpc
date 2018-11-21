@@ -68,6 +68,12 @@ abstract class RpcEnv(rpcEnvConfig : RpcEnvConfig) {
   def shutdown(): Unit
 
   /**
+    * Shutdown this [[RpcEnv]] asynchronously. If need to make sure [[RpcEnv]] exits successfully,
+    * call [[awaitTermination()]] straight after [[shutdown()]].
+    */
+  def shutdownNow(): Unit
+
+  /**
     * Wait until [[RpcEnv]] exits.
     *
     * TODO do we need a timeout parameter?

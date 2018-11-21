@@ -153,6 +153,14 @@ class RpcDispatcher(nettyEnv: NettyRpcEnv) {
     inboxMessageProcessThreadpool.awaitTermination(Long.MaxValue, TimeUnit.MILLISECONDS)
   }
 
+  def awaitTermination(timeoutMs : Long): Unit = {
+    inboxMessageProcessThreadpool.awaitTermination(timeoutMs, TimeUnit.MILLISECONDS)
+  }
+
+  def shutdownNow(): Unit = {
+    inboxMessageProcessThreadpool.shutdownNow()
+  }
+
   /**
     * Return if the endpoint exists
     */
