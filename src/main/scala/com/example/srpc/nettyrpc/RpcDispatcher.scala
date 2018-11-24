@@ -157,6 +157,10 @@ class RpcDispatcher(nettyEnv: NettyRpcEnv) {
     inboxMessageProcessThreadpool.awaitTermination(timeoutMs, TimeUnit.MILLISECONDS)
   }
 
+  def shutdown(): Unit = {
+    inboxMessageProcessThreadpool.shutdown()
+  }
+
   def shutdownNow(): Unit = {
     inboxMessageProcessThreadpool.shutdownNow()
   }

@@ -1,9 +1,11 @@
 package com.example.jrpc.nettyrpc.rpc;
 
+import java.io.Serializable;
+
 /**
  * Created by yilong on 2018/3/13.
  */
-public class HostPort {
+public class HostPort implements Serializable {
     private String host;
     private int port;
     public HostPort(String host, int port) {

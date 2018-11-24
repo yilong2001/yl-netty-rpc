@@ -115,6 +115,43 @@ class NettyRpcEnv(val config: RpcEnvConfig) extends RpcEnv(config) {
     }
 
     if (timeoutScheduler != null) {
+      timeoutScheduler.shutdown()
+    }
+
+    if (dispatcher != null) {
+      dispatcher.shutdown()
+    }
+
+    if (server != null) {
+      server.close()
+    }
+
+    if (clientFactory != null) {
+      clientFactory.close()
+    }
+
+    if (clientConnectionExecutor != null) {
+      clientConnectionExecutor.shutdown()
+    }
+
+    if (sameThreadExecutionContext != null) {
+      sameThreadExecutionContext.shutdown()
+    }
+  }
+
+  override def shutdownNow(): Unit = {
+    if (!stopped.compareAndSet(false, true)) {
+      return
+    }
+
+    val iter = outboxes.values().iterator()
+    while (iter.hasNext()) {
+      val outbox = iter.next()
+      outboxes.remove(outbox.receiver)
+      outbox.stop()
+    }
+
+    if (timeoutScheduler != null) {
       timeoutScheduler.shutdownNow()
     }
 
@@ -137,10 +174,6 @@ class NettyRpcEnv(val config: RpcEnvConfig) extends RpcEnv(config) {
     if (sameThreadExecutionContext != null) {
       sameThreadExecutionContext.shutdownNow()
     }
-  }
-
-  override def shutdownNow(): Unit = {
-    shutdown()
   }
 
   /**
